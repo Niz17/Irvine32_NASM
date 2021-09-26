@@ -1,0 +1,92 @@
+Pseudo-code:  
+
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+; sets the cursor position to the xy-coordinate passed
+_GoToXY: 
+
+; locateStr stores the formatting for the printing purposes
+; the ESC tells printf that it's an escape character
+segment .data 
+   locateStr db ESC, "[%d;%dH",0
+ 
+segment .text 
+   ; printf has parameters printf(format, current_number) & the %d and %dh in locateStr expects two arguments
+;<NOTE> 'rdi' stores the format (1st parameter)
+   ; store the data for 'format' in rdi (first 
+;<NOTE> 'rsi' stores the current_number (2nd parameter)
+   ; store the y-coordinate into rsi
+   ; store the x-coordinate into rdx 
+   ; zero rax before we call printf
+   ; call printf 
+;<NOTE> 'printf' needs the stack to be 16-bit aligned in order to function
+;<NOTE> 'printf' also destroys rax and rcx, so if you're using either of these registers, save them using push
+
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+; returns the length of the string
+_strLen:
+
+segment .text:
+   ; save the memory for rbp
+   ; store the current stack pointer into the base pointer
+   ; save the memory for rdi
+   ; store the offset of string in memory into rdi
+   ; set the counter as 0 (counter can be a register)
+   ;[LOOP]:
+      ; while(string.length() > 0) {
+      ;   counter++
+      ;   rdi++
+      ; reference to .Continue: after loop ends
+;<NOTE> rdi is pointer to the offset string memory location so incrementing it will move the pointer within the string
+      ; }
+   .Continue:
+      ; restore the saved memory of rdi
+      ; restore the saved memory of rbp
+      ; return 8
+;<NOTE> returns 8 bytes of free space from the stack, for better understanding, it pops off the last 8-bytes in the stack
+
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+; displays the string 
+_writeString:
+
+segment .text:
+   ; save the memory for rbp
+   ; store the current stack pointer into the base pointer
+   ; store the offset of string in memory into r8
+   ; save the memory for r8
+   ; call _strLen, which returns string length in rdx
+;<NOTE> rsi - stores the message location (to be printed/displayed)
+   ; store r8 into rsi
+;<NOTE> rdx - stores the number of characters to be displayed
+   ; store rdx into rdx (also works as a syscall)
+   ; call the write syscall
+   ; call the stdout syscall
+   ; return 8 
+;<NOTE> returns 8 bytes of free space from the stack, for better understanding, it pops off the last 8-bytes in the stack
+
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+; clears the screen and resets the cursor back to the top left of the screen
+_clearScreen:
+
+segment .data
+; clrStr stores the formatting to clear the screen
+; ESC tells printf it's an escape character
+clrStr db ESC, "[2J", 0
+
+segment .text
+  ; save the memory for rdx
+  ; store the formatting into rdx
+  ; call _writeString
+  ; set the x and y coordinate as 0
+  ; call _GoToXY
+  ; restore the saved memory of rdx
+  ; return 8 
+;<NOTE> returns 8 bytes of free space from the stack, for better understanding, it pops off the last 8-bytes in the stack
+
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+
+
